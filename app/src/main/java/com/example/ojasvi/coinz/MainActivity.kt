@@ -1,5 +1,6 @@
 package com.example.ojasvi.coinz
 
+import android.content.Context
 import android.graphics.Camera
 import android.location.Location
 import android.os.Bundle
@@ -24,8 +25,11 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
+import org.jetbrains.anko.*
 
 import kotlinx.android.synthetic.main.activity_main.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 // OnMapReadyCallback,
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener {
@@ -33,6 +37,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val tag = "MainActivity"
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
+
+    private var downloadDate = "" // Format: YYYY/MM/DD
+    private val preferencesFile = "MyPrefsFile" // for storing preferences
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -54,6 +61,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        val date = LocalDate.now()
+        val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
+        val formattedDate = date.format(formatDate)
 
         Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
 
@@ -63,6 +73,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
+        doAsync {
+            val coins = DownloadFileTask("http://homepages.inf.ed.ac.uk/stg/coinz/$formattedDate/coinzmap.geojson").run()
+            Log.d(tag,coins)
+        }
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?){
@@ -145,6 +159,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     public override fun onStart(){
         super.onStart()
         mapView?.onStart()
+        // Restore preferences
+        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        // use ”” as the default value (this might be the first time the app is run)
+        downloadDate = settings.getString("lastDownloadDate", "")
+        // Write a message to ”logcat” (for debugging purposes)
+        Log.d(tag, "[onStart] Recalled lastDownloadDate is ’$downloadDate’")
     }
     @SuppressWarnings("MissingPermission")
     private fun initialiseLocationLayer(){
@@ -178,5 +198,43 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        mapView?.onResume()
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        mapView?.onPause()
+    }
+
+    public override fun onStop() {
+        super.onStop()
+        mapView?.onStop()
+        Log.d(tag, "[onStop] Storing lastDownloadDate of $downloadDate")
+        // All objects are from android.context.Context
+        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        // We need an Editor object to make preference changes.
+        val editor = settings.edit()
+        editor.putString("lastDownloadDate", downloadDate)
+        // Apply the edits!
+        editor.apply()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView?.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView?.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView?.onSaveInstanceState(outState)
     }
 }

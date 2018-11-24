@@ -1,7 +1,10 @@
 package com.example.ojasvi.coinz
 
 import android.content.Context
+import android.content.pm.FeatureInfo
+import android.graphics.Bitmap
 import android.graphics.Camera
+import android.graphics.Point
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -15,7 +18,9 @@ import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.geojson.*
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -25,6 +30,8 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import org.jetbrains.anko.*
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -45,6 +52,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private lateinit var permissionsManager: PermissionsManager
     private lateinit var locationEngine: LocationEngine
     private lateinit var locationLayerPlugin : LocationLayerPlugin
+    private val date = LocalDate.now()
+    private val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
+    private val formattedDate = date.format(formatDate)
+    private var coins = ""
 
 //    override fun onCreate(savedInstanceState: Bundle?) {
 //        super.onCreate(savedInstanceState)
@@ -61,10 +72,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        val date = LocalDate.now()
-        val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
-        val formattedDate = date.format(formatDate)
-
+//        val date = LocalDate.now()
+//        val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
+//        val formattedDate = date.format(formatDate)
+//        var coins = ""
         Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
 
         // Need findViewById for a
@@ -74,9 +85,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
         doAsync {
-            val coins = DownloadFileTask("http://homepages.inf.ed.ac.uk/stg/coinz/$formattedDate/coinzmap.geojson").run()
-            Log.d(tag,coins)
+            coins = DownloadFileTask("http://homepages.inf.ed.ac.uk/stg/coinz/$formattedDate/coinzmap.geojson").run()
+            Log.d(tag, coins)
         }
+           // object : OnMapReadyCallback {
+                //onMapReady(mapboxMap: MapboxMap?)
+        //
+
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?){
@@ -91,6 +106,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //Make location information available
             enableLocation()
+            //add the coins
+            val featureCollection : FeatureCollection = FeatureCollection.fromJson(coins)
+            //val source = GeoJsonSource("my.data.source",featureCollection)
+            val features : List<Feature>? = featureCollection?.features()
+            if(features != null) {
+                for (feature: Feature in features) {
+                    var geo = feature.geometry() as com.mapbox.geojson.Point
+
+                    var props = feature.properties()
+                    var cur = props?.get("currency")
+                    map?.addMarker(MarkerOptions()
+                            .position(LatLng(geo.latitude(),geo.longitude()))
+                            .title(cur.toString()))
+                }
+            }
         }
     }
 

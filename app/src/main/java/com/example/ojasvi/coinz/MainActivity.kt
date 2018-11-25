@@ -57,29 +57,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val formattedDate = date.format(formatDate)
     private var coins = ""
 
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_main)
-//        setSupportActionBar(toolbar)
-//
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-//        }
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-//        val date = LocalDate.now()
-//        val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
-//        val formattedDate = date.format(formatDate)
-//        var coins = ""
         Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
 
-        // Need findViewById for a
-        //    com.mapbox.mapboxsdk.maps.MapView
         mapView = findViewById(R.id.mapboxMapView)
 
         mapView?.onCreate(savedInstanceState)
@@ -88,10 +72,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             coins = DownloadFileTask("http://homepages.inf.ed.ac.uk/stg/coinz/$formattedDate/coinzmap.geojson").run()
             Log.d(tag, coins)
         }
-           // object : OnMapReadyCallback {
-                //onMapReady(mapboxMap: MapboxMap?)
-        //
-
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?){
@@ -115,10 +95,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     var geo = feature.geometry() as com.mapbox.geojson.Point
 
                     var props = feature.properties()
-                    var cur = props?.get("currency")
+                    var currency = props?.get("currency")
                     map?.addMarker(MarkerOptions()
                             .position(LatLng(geo.latitude(),geo.longitude()))
-                            .title(cur.toString()))
+                            .title(currency.toString()))
                 }
             }
         }

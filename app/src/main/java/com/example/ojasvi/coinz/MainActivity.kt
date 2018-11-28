@@ -7,11 +7,15 @@ import android.graphics.Camera
 import android.graphics.Point
 import android.location.Location
 import android.os.Bundle
+import android.location.LocationManager
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
 import com.mapbox.android.core.location.LocationEnginePriority
@@ -57,15 +61,34 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val formattedDate = date.format(formatDate)
     private var coins = ""
 
+    //Saving collected coins
+    //initialise firestore
+    private var storeWallet: FirebaseFirestore? = null
+    //initialise dataset
+    private var wallet: MutableMap<String,Double> = hashMapOf()
+    private var mAuth: FirebaseAuth? = null
 
+    companion object {
+        private const val COLLECTION_KEY = "wallets"
+        private const val DOCUMENT_KEY = "User"
+        private const val NAME_FIELD = "Currency"
+        private const val TEXT_FIELD = "Worth in Gold"
+    }
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
+        storeWallet = FirebaseFirestore.getInstance()
+        mAuth = FirebaseAuth.getInstance()
+
+        // Use com.google.firebase.Timestamp objects instead of java.util.Date objects
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+        storeWallet?.firestoreSettings = settings
 
         mapView = findViewById(R.id.mapboxMapView)
-
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
         doAsync {
@@ -101,11 +124,47 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                             .title(currency.toString()))
                 }
             }
+
+            //collect the coins
+            map?.setOnMarkerClickListener { marker ->
+                val markerLocation = Location(LocationManager.GPS_PROVIDER).apply {
+                    latitude = marker.position.latitude
+                    longitude = marker.position.longitude
+                }
+                if(originLocation.distanceTo(markerLocation)<25) {
+                    val markerLoc =  marker.position
+                    if(features != null) {
+                        for (feature: Feature in features){
+                            var props = feature.properties()
+                            var currency = props?.get("currency")
+                            var value = props?.get("value")
+                            var geo = feature.geometry() as com.mapbox.geojson.Point
+                            if(markerLoc.latitude == geo.latitude() && markerLoc.longitude == geo.longitude()){
+                                wallet.put(currency!!.toString(),value!!.asDouble )
+                                storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)?.set(wallet as Map<String, Any>)
+                            }
+                        }
+                    }
+                    map?.removeMarker(marker)
+                    toast("You collected a coin!")
+                    Log.d(tag,wallet.toString())
+                }
+                else
+                {
+                    toast("Coin not within 25 meters, sorry! :(")
+                }
+                true
+            }
         }
     }
 
     private fun enableLocation(){
         if(PermissionsManager.areLocationPermissionsGranted(this)){
+           Log.d(tag, "Permissions are granted")
+            initialiseLocationEngine()
+            initialiseLocationLayer()
+        }
+        else{
             Log.d(tag,"Permissions are not granted")
             permissionsManager = PermissionsManager(this)
             permissionsManager.requestLocationPermissions(this)
@@ -148,7 +207,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     @SuppressWarnings("MissingPermission")
     override fun onConnected() {
         Log.d(tag,"[onConnected] requesting location updates")
-        locationEngine.removeLocationUpdates()
+        locationEngine.requestLocationUpdates()
     }
 
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {

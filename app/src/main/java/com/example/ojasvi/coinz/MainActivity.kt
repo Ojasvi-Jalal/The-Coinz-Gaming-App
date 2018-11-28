@@ -3,12 +3,17 @@ package com.example.ojasvi.coinz
 import android.content.Context
 import android.content.pm.FeatureInfo
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Camera
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Bundle
 import android.location.LocationManager
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log
 import android.view.Menu
@@ -24,6 +29,7 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.*
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -34,6 +40,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import org.jetbrains.anko.*
@@ -119,9 +126,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
                     var props = feature.properties()
                     var currency = props?.get("currency")
+                    var currencyType = currency.toString()
+
+                    var coinIcon = R.drawable.quid
+                    if(currencyType == "\"DOLR\"")
+                        coinIcon = R.drawable.dolr
+                    else if (currencyType == "\"QUID\"")
+                        coinIcon = R.drawable.quid
+                    else if (currencyType == "\"PENY\"")
+                        coinIcon = R.drawable.peny
+                    else if (currencyType == "\"SHIL\"")
+                        coinIcon = R.drawable.shil
+
+                    //get icon from resources based on type of currency
+                    //val coinIcon = resources.getIdentifier(currencyType,"drawable",packageName)
+                    val icons = IconFactory.getInstance(this)
+
                     map?.addMarker(MarkerOptions()
                             .position(LatLng(geo.latitude(),geo.longitude()))
-                            .title(currency.toString()))
+                            .title(currencyType)
+                            .icon(icons.fromResource(coinIcon)))
                 }
             }
 

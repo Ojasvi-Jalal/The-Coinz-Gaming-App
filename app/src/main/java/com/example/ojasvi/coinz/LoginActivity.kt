@@ -190,8 +190,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, LoaderCallbacks
 
                             } else{
                                 //Sign in failed, display a message to the User
-                                Log.d("Message","Login Failed :( ")
-                                toast("Login Failed :( ${task.exception}")
+                                Log.d("Message","Login Failed :( ${task.exception}")
+                                toast("Login Failed :(")
                             }
                         }
         }

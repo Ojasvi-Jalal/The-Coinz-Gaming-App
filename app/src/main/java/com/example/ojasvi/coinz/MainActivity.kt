@@ -128,15 +128,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     var currency = props?.get("currency")
                     var currencyType = currency.toString()
 
-                    var coinIcon = R.drawable.quid
-                    if(currencyType == "\"DOLR\"")
-                        coinIcon = R.drawable.dolr
-                    else if (currencyType == "\"QUID\"")
-                        coinIcon = R.drawable.quid
-                    else if (currencyType == "\"PENY\"")
-                        coinIcon = R.drawable.peny
-                    else if (currencyType == "\"SHIL\"")
-                        coinIcon = R.drawable.shil
+                    var coinIcon = R.drawable.test
+//                    if(currencyType == "\"DOLR\"")
+//                        coinIcon = R.drawable.dolr
+//                    else if (currencyType == "\"QUID\"")
+//                        coinIcon = R.drawable.quid
+//                    else if (currencyType == "\"PENY\"")
+//                        coinIcon = R.drawable.peny
+//                    else if (currencyType == "\"SHIL\"")
+//                        coinIcon = R.drawable.shil
 
                     //get icon from resources based on type of currency
                     //val coinIcon = resources.getIdentifier(currencyType,"drawable",packageName)

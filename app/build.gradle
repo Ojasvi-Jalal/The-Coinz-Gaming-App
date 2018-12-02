@@ -47,7 +47,6 @@ dependencies {
     //Firebase Firestore NoSQL database
     implementation 'com.google.firebase:firebase-firestore:17.1.1'
 
-
     //Android architecture
     implementation 'android.arch.core:runtime:1.1.1'
     implementation 'android.arch.core:common:1.1.1'

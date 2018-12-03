@@ -42,7 +42,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".SignUpActivity" />
-        <activity android:name=".MainMenuActivity"></activity>
+        <activity android:name=".MainMenuActivity" />
+        <activity
+            android:name=".LeaderboardActivity"
+            android:label="@string/title_activity_leaderboard" />
+        <activity
+            android:name=".BankActivity"
+            android:label="@string/title_activity_bank"></activity>
     </application>
 
 </manifest>

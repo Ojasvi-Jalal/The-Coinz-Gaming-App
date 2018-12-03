@@ -46,6 +46,7 @@ class MainMenuActivity : AppCompatActivity() {
 
         leaderBoard!!.setOnClickListener(){
             Log.d(TAG,"User clicked on \"LeaderBoard\"")
+            openLeaderBoard()
         }
 
         shop!!.setOnClickListener(){
@@ -85,6 +86,12 @@ class MainMenuActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_HOME)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    }
+
+    fun openLeaderBoard(){
+        Log.d(TAG,"LeaderBoard")
+        val intent = Intent(this, LeaderboardActivity::class.java)
         startActivity(intent)
     }
 

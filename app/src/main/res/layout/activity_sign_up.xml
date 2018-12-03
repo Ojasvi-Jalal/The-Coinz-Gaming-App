@@ -9,54 +9,38 @@
     tools:context=".SignUpActivity">
 
     <EditText
+        android:id="@+id/emailSignUp"
+        android:layout_width="377dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="44dp"
+        android:hint="Email"
+        app:layout_constraintTop_toTopOf="@id/NickName"
+        tools:layout_editor_absoluteX="7dp"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
         android:id="@+id/NickName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="1dp"
         android:hint="Username"
-        app:layout_constraintBottom_toTopOf="@+id/passwordSignUp"
+        app:layout_constraintBottom_toTopOf="@id/passwordSignUp"
         app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.582"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emailSignUp" />
 
     <EditText
-        android:id="@+id/emailSignUp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="1dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
-        android:hint="Email"
-        app:layout_constraintBottom_toTopOf="@+id/NickName"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
         android:id="@+id/passwordSignUp"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginBottom="72dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="9dp"
+        android:layout_width="401dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="48dp"
         android:hint="Password"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/NickName" />
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="119dp"
-        android:gravity="center"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="220dp">
+        tools:layout_editor_absoluteX="7dp"
+        app:layout_constraintHorizontal_bias="0.582"
+        app:layout_constraintTop_toBottomOf="@id/NickName"
+        tools:ignore="MissingConstraints" />
 
         <Button
             android:id="@+id/register"
@@ -86,7 +70,3 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
-
-
-
-</android.support.constraint.ConstraintLayout>

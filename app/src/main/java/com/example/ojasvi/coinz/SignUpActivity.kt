@@ -28,6 +28,7 @@ class SignUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
+        mAuth = FirebaseAuth.getInstance()
         email_Text  = findViewById<EditText>(R.id.emailSignUp)
         password_Text = findViewById<EditText>(R.id.passwordSignUp)
         username_Text = findViewById(R.id.NickName)
@@ -48,7 +49,7 @@ class SignUpActivity : AppCompatActivity() {
     fun signup(){
         Log.d(TAG, "User Registration")
 
-        login_Button!!.isEnabled = false
+        login_Button!!.isEnabled = true
 
         // Reset errors.
         email_Text?.error = null

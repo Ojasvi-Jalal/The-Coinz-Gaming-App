@@ -114,6 +114,7 @@ class LoginActivity : AppCompatActivity() {
             focusView?.requestFocus()
         } else {
             Log.d("Message", "correct email and password were entered")
+            login_Button!!.isEnabled = true
             mAuth?.signInWithEmailAndPassword(email, password)
                     ?.addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
@@ -142,7 +143,7 @@ class LoginActivity : AppCompatActivity() {
 
     fun onLoginSuccess(){
         login_Button!!.isEnabled = true
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, MainMenuActivity::class.java)
         startActivity(intent)
     }
 

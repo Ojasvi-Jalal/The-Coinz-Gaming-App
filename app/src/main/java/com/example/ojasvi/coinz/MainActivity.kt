@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        //o.j@setSupportActionBar(toolbar)
         Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
         storeWallet = FirebaseFirestore.getInstance()
         mAuth = FirebaseAuth.getInstance()
@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     latitude = marker.position.latitude
                     longitude = marker.position.longitude
                 }
-                if(originLocation.distanceTo(markerLocation)<25) {
+                if(originLocation.distanceTo(markerLocation)<2005) {
                     val markerLoc =  marker.position
                     if(features != null) {
                         for (feature: Feature in features){

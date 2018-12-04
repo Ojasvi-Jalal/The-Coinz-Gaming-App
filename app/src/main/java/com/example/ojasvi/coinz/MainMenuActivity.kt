@@ -51,6 +51,7 @@ class MainMenuActivity : AppCompatActivity() {
 
         shop!!.setOnClickListener(){
             Log.d(TAG,"User clicked on \"shop\"")
+            goToShop()
         }
 
         bank!!.setOnClickListener(){
@@ -99,6 +100,12 @@ class MainMenuActivity : AppCompatActivity() {
     fun goToBank(){
         Log.d(TAG,"Bank")
         val intent = Intent(this,BankActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun goToShop(){
+        Log.d(TAG,"Shop")
+        val intent = Intent(this,ShoppingActivity::class.java)
         startActivity(intent)
     }
     companion object {

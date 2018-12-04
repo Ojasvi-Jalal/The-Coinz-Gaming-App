@@ -18,4 +18,6 @@
     </string>
     <string name="title_activity_leaderboard">LeaderboardActivity</string>
     <string name="title_activity_bank">BankActivity</string>
+    <string name="title_activity_shop">ShopActivity</string>
+    <string name="title_activity_shopping">ShoppingActivity</string>
 </resources>

@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //Saving collected coins
     //initialise firestore
     private var storeWallet: FirebaseFirestore? = null
+
     //initialise dataset
     private var wallet: MutableMap<String,Double> = hashMapOf()
     private var mAuth: FirebaseAuth? = null

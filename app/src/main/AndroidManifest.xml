@@ -48,7 +48,8 @@
             android:label="@string/title_activity_leaderboard" />
         <activity
             android:name=".BankActivity"
-            android:label="@string/title_activity_bank"></activity>
+            android:label="@string/title_activity_bank" />
+        <activity android:name=".WalletActivity"></activity>
     </application>
 
 </manifest>

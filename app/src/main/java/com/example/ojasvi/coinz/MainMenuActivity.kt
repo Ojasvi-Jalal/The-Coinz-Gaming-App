@@ -55,6 +55,7 @@ class MainMenuActivity : AppCompatActivity() {
 
         bank!!.setOnClickListener(){
             Log.d(TAG,"User clicked on \"bank\"")
+            goToBank()
         }
 
         quitGame!!.setOnClickListener(){
@@ -95,6 +96,11 @@ class MainMenuActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun goToBank(){
+        Log.d(TAG,"Bank")
+        val intent = Intent(this,BankActivity::class.java)
+        startActivity(intent)
+    }
     companion object {
         var TAG = "Main Menu"
     }

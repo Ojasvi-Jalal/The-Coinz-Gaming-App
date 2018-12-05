@@ -73,8 +73,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var storeWallet: FirebaseFirestore? = null
 
     //initialise dataset
-    private var wallet: MutableMap<String,Double> = hashMapOf()
+   // private var wallet: MutableList<Coin> = MutableList()
+    private val wallet = mutableListOf<Coin>()
     private var mAuth: FirebaseAuth? = null
+    private val coinPresent = mutableListOf<Coin>()
 
     companion object {
         private const val COLLECTION_KEY = "wallets"
@@ -121,31 +123,38 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             val featureCollection : FeatureCollection = FeatureCollection.fromJson(coins)
             //val source = GeoJsonSource("my.data.source",featureCollection)
             val features : List<Feature>? = featureCollection?.features()
-            if(features != null) {
-                for (feature: Feature in features) {
-                    var geo = feature.geometry() as com.mapbox.geojson.Point
+            storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)?.collection("wallet")?.get()?.addOnCompleteListener { task ->
+                if(task.result !=null) {
+                    for (document in task.result!!)
+                        coinPresent.add(document.toObject(Coin::class.java))
+                    if(features != null) {
+                        for (feature: Feature in features) {
+                            var geo = feature.geometry() as com.mapbox.geojson.Point
 
-                    var props = feature.properties()
-                    var currency = props?.get("currency")
-                    var currencyType = currency.toString()
-                    var coinIcon = R.drawable.test
-                    if(currencyType == "\"DOLR\"")
-                        coinIcon = R.drawable.dolr
-                    else if (currencyType == "\"QUID\"")
-                        coinIcon = R.drawable.quid
-                    else if (currencyType == "\"PENY\"")
-                        coinIcon = R.drawable.peny
-                    else if (currencyType == "\"SHIL\"")
-                        coinIcon = R.drawable.shil
+                            var currency = feature.getStringProperty("currency")
 
-                    //get icon from resources based on type of currency
-                    //val coinIcon = resources.getIdentifier(currencyType,"drawable",packageName)
-                    val icons = IconFactory.getInstance(this)
+                            var coinIcon = R.drawable.test
+                            if(currency == "DOLR")
+                                coinIcon = R.drawable.dolr
+                            else if (currency== "QUID")
+                                coinIcon = R.drawable.quid
+                            else if (currency == "PENY")
+                                coinIcon = R.drawable.peny
+                            else if (currency == "SHIL")
+                                coinIcon = R.drawable.shil
 
-                    map?.addMarker(MarkerOptions()
-                            .position(LatLng(geo.latitude(),geo.longitude()))
-                            .title(currencyType)
-                            .icon(icons.fromResource(coinIcon)))
+                            val icons = IconFactory.getInstance(this)
+
+                            if(coinPresent.map { it -> it.id }.contains(feature.getStringProperty("id")) )
+                                Log.d(tag,"Won't add this marker")
+                            else {
+                                map?.addMarker(MarkerOptions()
+                                        .position(LatLng(geo.latitude(), geo.longitude()))
+                                        .title(currency)
+                                        .icon(icons.fromResource(coinIcon)))
+                            }
+                        }
+                    }
                 }
             }
 
@@ -159,13 +168,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     val markerLoc =  marker.position
                     if(features != null) {
                         for (feature: Feature in features){
-                            var props = feature.properties()
-                            var currency = props?.get("currency")
-                            var value = props?.get("value")
+                            var currency =  feature.getStringProperty("currency")
+                            var value = feature.getStringProperty("value")
+                            var id = feature.getStringProperty("id")
+                            var coin: Coin = Coin(currency,value,id)
+                            Log.d(tag,coin.toString())
                             var geo = feature.geometry() as com.mapbox.geojson.Point
                             if(markerLoc.latitude == geo.latitude() && markerLoc.longitude == geo.longitude()){
-                                wallet.put(currency!!.toString(),value!!.asDouble )
-                                storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)?.set(wallet as Map<String, Any>)
+                                wallet.add(coin)
+                                storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)?.collection("wallet")?.add(coin)
                             }
                         }
                     }

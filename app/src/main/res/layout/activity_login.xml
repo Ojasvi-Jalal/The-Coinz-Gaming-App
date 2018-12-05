@@ -57,6 +57,7 @@
         android:drawableStart="@drawable/padlock"
         android:hint="Password"
         android:padding="10dp"
+        android:inputType="textPassword"
         app:layout_constraintBottom_toTopOf="@+id/sign_in_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

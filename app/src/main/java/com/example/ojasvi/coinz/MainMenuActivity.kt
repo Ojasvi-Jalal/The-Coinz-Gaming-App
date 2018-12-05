@@ -80,6 +80,8 @@ class MainMenuActivity : AppCompatActivity() {
     fun openLoginPage(){
         Log.d(TAG,"Opening the login screen")
         val intent = Intent(this, LoginActivity::class.java)
+        mAuth?.signOut()
+        mAuth = null
         startActivity(intent)
     }
 

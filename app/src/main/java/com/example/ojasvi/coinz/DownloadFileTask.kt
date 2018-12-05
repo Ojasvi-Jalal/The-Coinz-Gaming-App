@@ -27,7 +27,7 @@ class DownloadFileTask(private val url: String){
 
     fun run():String = try {
         loadFileFromNetwork(url)
-    } catch ( e: IOException){
+    } catch ( e:  IOException){
         "Unable to load content. Check your network connection"
     }
 

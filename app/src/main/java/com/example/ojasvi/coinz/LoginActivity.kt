@@ -61,6 +61,9 @@ class LoginActivity : AppCompatActivity() {
 
         mAuth = FirebaseAuth.getInstance()
 
+        if(mAuth?.currentUser != null)
+            onLoginSuccess()
+
         signUpLink!!.setOnClickListener {
             //Start the register activity
             Log.d(TAG,"Starting Registration")

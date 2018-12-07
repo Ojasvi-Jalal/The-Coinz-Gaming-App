@@ -1,6 +1,7 @@
 package com.example.ojasvi.coinz
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.FeatureInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,9 +16,11 @@ import android.location.LocationManager
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity;
+import android.util.JsonReader
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -46,6 +49,8 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import org.jetbrains.anko.*
 
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONObject
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -67,6 +72,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
     private val formattedDate = date.format(formatDate)
     private var coins = ""
+    private var shilRate = ""
+    private  var quidRate = ""
+    private var dolrRate = ""
+    private var penyRate = ""
+    private var bankButton: ImageView? = null
 
     //Saving collected coins
     //initialise firestore
@@ -80,23 +90,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     companion object {
         private const val COLLECTION_KEY = "wallets"
-        private const val DOCUMENT_KEY = "User"
-        private const val NAME_FIELD = "Currency"
-        private const val TEXT_FIELD = "Worth in Gold"
     }
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //o.j@setSupportActionBar(toolbar)
-        Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
-        storeWallet = FirebaseFirestore.getInstance()
-        mAuth = FirebaseAuth.getInstance()
 
         // Use com.google.firebase.Timestamp objects instead of java.util.Date objects
         val settings = FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         storeWallet?.firestoreSettings = settings
+
+        Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
+        storeWallet = FirebaseFirestore.getInstance()
+        mAuth = FirebaseAuth.getInstance()
+
+        bankButton = findViewById(R.id.piggyBank)
 
         mapView = findViewById(R.id.mapboxMapView)
         mapView?.onCreate(savedInstanceState)
@@ -121,22 +130,43 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             enableLocation()
             //add the coins
             val featureCollection : FeatureCollection = FeatureCollection.fromJson(coins)
+
+            val prefSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+
+            shilRate = prefSettings.getString("shil rate", "")
+            quidRate = prefSettings.getString("quid rate", "")
+            dolrRate = prefSettings.getString("dolr rate", "")
+            penyRate = prefSettings.getString("peny rate", "")
+
+            val rates  = JSONObject(coins).getJSONObject("rates")
+            quidRate = rates.get("QUID").toString()
+            Log.d(tag,quidRate)
+            shilRate = rates.get("SHIL").toString()
+            Log.d(tag,shilRate)
+            dolrRate = rates.get("DOLR").toString()
+            Log.d(tag,dolrRate)
+            penyRate = rates.get("PENY").toString()
+            Log.d(tag,penyRate)
+
             //val source = GeoJsonSource("my.data.source",featureCollection)
             val features : List<Feature>? = featureCollection?.features()
-            storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)?.collection("wallet")?.get()?.addOnCompleteListener { task ->
-                if(task.result !=null) {
+            storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)
+                    ?.collection("wallet")
+                    ?.get()
+                    ?.addOnCompleteListener { task ->
+                if (task.result != null) {
                     for (document in task.result!!)
                         coinPresent.add(document.toObject(Coin::class.java))
-                    if(features != null) {
+                    if (features != null) {
                         for (feature: Feature in features) {
                             var geo = feature.geometry() as com.mapbox.geojson.Point
 
                             var currency = feature.getStringProperty("currency")
 
                             var coinIcon = R.drawable.test
-                            if(currency == "DOLR")
+                            if (currency == "DOLR")
                                 coinIcon = R.drawable.dolr
-                            else if (currency== "QUID")
+                            else if (currency == "QUID")
                                 coinIcon = R.drawable.quid
                             else if (currency == "PENY")
                                 coinIcon = R.drawable.peny
@@ -145,17 +175,31 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
                             val icons = IconFactory.getInstance(this)
 
-                            if(coinPresent.map { it -> it.id }.contains(feature.getStringProperty("id")) )
-                                Log.d(tag,"Won't add this marker")
-                            else {
+                            if (downloadDate == formattedDate) {
+                                if (coinPresent.map { it -> it.id }.contains(feature.getStringProperty("id")))
+                                    Log.d(tag, "Won't add this marker")
+                                else {
+                                    map?.addMarker(MarkerOptions()
+                                            .position(LatLng(geo.latitude(), geo.longitude()))
+                                            .title(currency)
+                                            .icon(icons.fromResource(coinIcon)))
+                                }
+                            } else {
                                 map?.addMarker(MarkerOptions()
                                         .position(LatLng(geo.latitude(), geo.longitude()))
                                         .title(currency)
                                         .icon(icons.fromResource(coinIcon)))
+                                downloadDate = formattedDate
+                            }
+                            bankButton?.setOnClickListener{
+                                Log.d(MainMenuActivity.TAG,"Opening the bank")
+                                val intent = Intent(this, BankActivity::class.java)
+                                startActivity(intent)
                             }
                         }
                     }
                 }
+                true
             }
 
             //collect the coins
@@ -266,7 +310,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         // Restore preferences
         val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         // use ”” as the default value (this might be the first time the app is run)
-        downloadDate = settings.getString("lastDownloadDate", "")
+        downloadDate= settings.getString("lastDownloadDate", "")
+        shilRate    = settings.getString("shilRate","")
+        quidRate    = settings.getString("quidRate","")
+        penyRate    = settings.getString("quidRate","")
+        dolrRate    = settings.getString("quidRate","")
         // Write a message to ”logcat” (for debugging purposes)
         Log.d(tag, "[onStart] Recalled lastDownloadDate is ’$downloadDate’")
     }
@@ -288,21 +336,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
     }
-//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        menuInflater.inflate(R.menu.menu_main, menu)
-//        return true
-//    }
-//
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        return when (item.itemId) {
-//            R.id.action_settings -> true
-//            else -> super.onOptionsItemSelected(item)
-//        }
-//    }
 
     public override fun onResume() {
         super.onResume()
@@ -321,8 +354,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         // All objects are from android.context.Context
         val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         // We need an Editor object to make preference changes.
-        val editor = settings.edit()
+        var editor = settings.edit()
         editor.putString("lastDownloadDate", downloadDate)
+        editor.putString("shilRate",shilRate)
+        editor.putString("quidRate",quidRate)
+        editor.putString("dolrRate",dolrRate)
+        editor.putString("penyRate",penyRate)
+
         // Apply the edits!
         editor.apply()
     }

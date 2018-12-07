@@ -31,6 +31,7 @@ import android.widget.EditText
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.toast
@@ -87,6 +88,7 @@ class LoginActivity : AppCompatActivity() {
         // Store values at the time of the login attempt.
         val email = email_Text!!.text.toString()
         val password = password_Text!!.text.toString()
+
 
         var cancel = false
         var focusView: View? = null

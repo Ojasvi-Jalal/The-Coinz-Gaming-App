@@ -51,9 +51,6 @@
             android:label="@string/title_activity_bank" />
         <activity android:name=".WalletActivity" />
         <activity
-            android:name=".ShopActivity"
-            android:label="@string/title_activity_shop" />
-        <activity
             android:name=".ShoppingActivity"
             android:label="@string/title_activity_shopping"></activity>
     </application>

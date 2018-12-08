@@ -46,9 +46,21 @@ class BankActivity : Activity() {
         val quidRate = prefSettings?.getString("quidRate","0")?.toBigDecimal()
         Log.d(TAG,quidRate.toString())
 
-
         val ref = bankAccount?.collection("wallets")
                 ?.document(mAuth?.currentUser?.email!!)
+
+        ref?.collection("User info")
+                ?.document("Available funds")
+                ?.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.w(TAG, "Listen failed.", e)
+            }
+
+            balance = findViewById(R.id.userBalance)
+            balance?.text = "%.3f".format(snapshot?.getDouble("Account Balance"))
+
+        }
+
         ref?.collection("User info")
             ?.document("Available funds")
             ?.get()
@@ -115,13 +127,30 @@ class BankActivity : Activity() {
         balance?.text = "%.3f".format(totalBalance)
         val netWorth = HashMap<String, Any?>()
         netWorth["Account Balance"] = totalBalance.toLong()
-        bankAccount?.collection("wallets")
+        var db = bankAccount?.collection("wallets")
                 ?.document(mAuth?.currentUser?.email!!)
                 ?.collection("User info")
+        db
                 ?.document("Available funds")
                 ?.set(netWorth)
                 ?.addOnSuccessListener { Log.d(TAG, "Account Balance successfully written!") }
                 ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
+
+
+        var nickname:String = ""
+        bankAccount?.runTransaction { transaction ->
+            if(db != null) {
+                val doc = transaction.get(db.document("Nickname"))
+                if(doc.exists()) {
+                    nickname = doc.getString("Nickname")!!
+                    val score = HashMap<String, Any?>()
+                    score[nickname] = totalBalance.toLong()
+                    transaction.set(bankAccount?.collection("wallets")?.document("scores")!!,score)
+                }
+            }
+        }
+
+
     }
 
     companion object {

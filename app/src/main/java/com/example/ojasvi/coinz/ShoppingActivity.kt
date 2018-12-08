@@ -44,11 +44,10 @@ class ShoppingActivity : Activity() {
         val ref = availableFunds?.collection("wallets")
                 ?.document(mAuth?.currentUser?.email!!)
 
-        ref
-                ?.collection("User info")
-                ?.document("Available funds")
-                ?.get()
-                ?.addOnSuccessListener {
+        ref?.collection("User info")
+                        ?.document("Available funds")
+                        ?.get()
+                        ?.addOnSuccessListener {
                     if(it.exists() && it != null) {
                     balance = it.getDouble("Account Balance")?.toLong()
                     buyBungalowButton?.isEnabled = true

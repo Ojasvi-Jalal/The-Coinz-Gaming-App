@@ -155,7 +155,7 @@ class WalletActivity : AppCompatActivity() {
         for(coin in coins)
             if (coin.currency == "PENY")
                 displayCoins.add(coin)
-        adapter = RecyclerAdapter(displayCoins)
+        adapter = RecyclerAdapter(displayCoins,this)
         recyclerView.adapter = adapter
         location = "peny"
     }
@@ -164,7 +164,7 @@ class WalletActivity : AppCompatActivity() {
         for(coin in coins)
             if (coin.currency == "DOLR")
                 displayCoins.add(coin)
-        adapter = RecyclerAdapter(displayCoins)
+        adapter = RecyclerAdapter(displayCoins, this)
         recyclerView.adapter = adapter
         location = "dollar"
     }
@@ -173,7 +173,7 @@ class WalletActivity : AppCompatActivity() {
         for(coin in coins)
             if (coin.currency == "SHIL")
                 displayCoins.add(coin)
-        adapter = RecyclerAdapter(displayCoins)
+        adapter = RecyclerAdapter(displayCoins, this)
         recyclerView.adapter = adapter
         location = "shil"
     }
@@ -182,7 +182,7 @@ class WalletActivity : AppCompatActivity() {
         for(coin in coins)
             if (coin.currency == "QUID")
                 displayCoins.add(coin)
-        adapter = RecyclerAdapter(displayCoins)
+        adapter = RecyclerAdapter(displayCoins, this)
         recyclerView.adapter = adapter
         location = "quid"
     }
@@ -190,7 +190,7 @@ class WalletActivity : AppCompatActivity() {
     fun displayWallet(){
         displayCoins.clear()
         displayCoins.addAll(coins)
-        adapter = RecyclerAdapter(displayCoins)
+        adapter = RecyclerAdapter(displayCoins, this)
         recyclerView.adapter = adapter
         location = "wallet"
     }

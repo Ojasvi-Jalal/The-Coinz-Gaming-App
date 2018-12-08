@@ -30,6 +30,7 @@ class SignUpActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_up)
 
         mAuth = FirebaseAuth.getInstance()
+        userInfo = FirebaseFirestore.getInstance()
         email_Text  = findViewById<EditText>(R.id.emailSignUp)
         password_Text = findViewById<EditText>(R.id.passwordSignUp)
         username_Text = findViewById(R.id.sendee)

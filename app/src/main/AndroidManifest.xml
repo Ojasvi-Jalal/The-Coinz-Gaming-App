@@ -52,7 +52,10 @@
         <activity android:name=".WalletActivity" />
         <activity
             android:name=".ShoppingActivity"
-            android:label="@string/title_activity_shopping"></activity>
+            android:label="@string/title_activity_shopping" />
+        <activity
+            android:name=".GiftActivity"
+            android:label="@string/title_activity_gift"></activity>
     </application>
 
 </manifest>

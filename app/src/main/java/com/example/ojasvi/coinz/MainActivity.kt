@@ -150,7 +150,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //val source = GeoJsonSource("my.data.source",featureCollection)
             val features : List<Feature>? = featureCollection?.features()
-            storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)
+            val ref = storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.currentUser?.email!!)
+            ref
                     ?.collection("wallet")
                     ?.get()
                     ?.addOnCompleteListener { task ->
@@ -220,7 +221,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                             var geo = feature.geometry() as com.mapbox.geojson.Point
                             if(markerLoc.latitude == geo.latitude() && markerLoc.longitude == geo.longitude()){
                                 wallet.add(coin)
-                                storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.uid!!)?.collection("wallet")?.add(coin)
+                                ref?.collection("wallet")?.add(coin)
                             }
                         }
                     }

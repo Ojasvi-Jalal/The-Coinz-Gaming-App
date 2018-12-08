@@ -24,7 +24,7 @@
         android:text="dhgchsdgc" />
 
     <Button
-        android:id="@+id/depositOrGift"
+        android:id="@+id/deposit"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_margin="8dp"

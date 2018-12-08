@@ -1,6 +1,7 @@
 package com.example.ojasvi.coinz
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.annotation.MainThread
@@ -11,13 +12,16 @@ import android.widget.ImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_wallet.*
+import kotlinx.android.synthetic.main.recyclerview_item_row.*
 
 class WalletActivity : AppCompatActivity() {
 
     private  lateinit var adapter: RecyclerAdapter
     private lateinit var  linearLayoutManager: LinearLayoutManager
+    private lateinit var recyclerView: RecyclerView
+
     //val fakeData = ArrayList<Coin>()
-    private val coins = ArrayList<Coin>()
+    private var coins = ArrayList<Coin>()
     private val displayCoins = ArrayList<Coin>()
     //Buttons: choosing the type of coins to be displayed
 
@@ -26,7 +30,8 @@ class WalletActivity : AppCompatActivity() {
     private var quid_Button: ImageView? = null
     private var peny_Button: ImageView? = null
     private var wallet_Button: ImageView? = null
-    private var deposit_Button: ImageView? = null
+    private var gift_Button: ImageView? = null
+    private var location:String? = ""
 
     //Firebase
     //wallet
@@ -61,17 +66,51 @@ class WalletActivity : AppCompatActivity() {
         dolr_Button = findViewById(R.id.dolrWallet)
         quid_Button = findViewById(R.id.quidWallet)
         peny_Button = findViewById(R.id.penyWallet)
-        deposit_Button = findViewById(R.id.depositOrGift)
+        gift_Button = findViewById(R.id.gift)
 
         //get all the coins in the wallet
-        wallet?.collection(WalletActivity.COLLECTION_KEY)?.document(mAuth?.uid!!)?.collection("wallet")?.get()?.addOnCompleteListener { task ->
-            if (task.result != null)
-                for (document in task.result!!)
+        val ref = wallet?.collection(WalletActivity.COLLECTION_KEY)?.document(mAuth?.currentUser?.email!!)
+//        ref?.collection("wallet")?.get()?.addOnCompleteListener { task ->
+//            if (task.result != null)
+//                for (document in task.result!!)
+//                    coins.add(document.toObject(Coin::class.java))
+//        }
+
+        ref?.collection("wallet")?.addSnapshotListener{ snapshot, e ->
+            if (e != null) {
+                Log.w(TAG, "Listen failed.", e)
+            }
+
+            coins = ArrayList()
+            for (document in snapshot!!)
                     coins.add(document.toObject(Coin::class.java))
+            Log.d(TAG, "Wallet modified")
+
+            if(location == "wallet"){
+                displayWallet()
+            }
+
+            if(location == "peny"){
+                displayPenys()
+            }
+
+            if(location == "dollar"){
+                displayDolrs()
+            }
+
+            if(location == "quid"){
+                displayQuids()
+            }
+
+            if(location == "shil"){
+                displayShils()
+            }
+
+
         }
 
         //get the recycler view ready
-        val recyclerView = findViewById<RecyclerView>(R.id.listOfCoins)
+        recyclerView = findViewById<RecyclerView>(R.id.listOfCoins)
         linearLayoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = linearLayoutManager
 
@@ -80,58 +119,79 @@ class WalletActivity : AppCompatActivity() {
         wallet_Button!!.setOnClickListener{
             displayCoins.clear()
             Log.d(TAG,"Displaying all coins")
-            for(coin in coins)
-                displayCoins.add(coin)
-            adapter = RecyclerAdapter(displayCoins)
-            recyclerView.adapter = adapter
+            displayWallet()
         }
         //filter the wallet and show the relevant coins
         shil_Button!!.setOnClickListener {
-            displayCoins.clear()
             Log.d(TAG, "Displaying shils")
-            for(coin in coins)
-                if (coin.currency == "SHIL")
-                    displayCoins.add(coin)
-            adapter = RecyclerAdapter(displayCoins)
-            recyclerView.adapter = adapter
+            displayShils()
         }
-
 
         dolr_Button!!.setOnClickListener {
-
-            displayCoins.clear()
             Log.d(TAG, "Displaying dolrs")
-            for(coin in coins)
-                if (coin.currency == "DOLR")
-                    displayCoins.add(coin)
-            adapter = RecyclerAdapter(displayCoins)
-            recyclerView.adapter = adapter
+            displayDolrs()
         }
-
 
         quid_Button!!.setOnClickListener {
-
-            displayCoins.clear()
             Log.d(TAG, "Displaying quids")
-            for(coin in coins)
-                if (coin.currency == "QUID")
-                    displayCoins.add(coin)
-            adapter = RecyclerAdapter(displayCoins)
-            recyclerView.adapter = adapter
+            displayQuids()
         }
-
 
         peny_Button!!.setOnClickListener {
-
-            displayCoins.clear()
             Log.d(TAG, "Displaying penys")
-            for(coin in coins)
-                if (coin.currency == "PENY")
-                    displayCoins.add(coin)
-            adapter = RecyclerAdapter(displayCoins)
-            recyclerView.adapter = adapter
+            displayPenys()
         }
 
+        gift_Button!!.setOnClickListener{
+            Log.d(TAG,"User wants to gift the coins")
+            intent = Intent(this,GiftActivity::class.java)
+            startActivity(intent)
+        }
 
+    }
+
+    fun displayPenys(){
+        displayCoins.clear()
+        for(coin in coins)
+            if (coin.currency == "PENY")
+                displayCoins.add(coin)
+        adapter = RecyclerAdapter(displayCoins)
+        recyclerView.adapter = adapter
+        location = "peny"
+    }
+    fun displayDolrs(){
+        displayCoins.clear()
+        for(coin in coins)
+            if (coin.currency == "DOLR")
+                displayCoins.add(coin)
+        adapter = RecyclerAdapter(displayCoins)
+        recyclerView.adapter = adapter
+        location = "dollar"
+    }
+    fun displayShils(){
+        displayCoins.clear()
+        for(coin in coins)
+            if (coin.currency == "SHIL")
+                displayCoins.add(coin)
+        adapter = RecyclerAdapter(displayCoins)
+        recyclerView.adapter = adapter
+        location = "shil"
+    }
+    fun displayQuids(){
+        displayCoins.clear()
+        for(coin in coins)
+            if (coin.currency == "QUID")
+                displayCoins.add(coin)
+        adapter = RecyclerAdapter(displayCoins)
+        recyclerView.adapter = adapter
+        location = "quid"
+    }
+
+    fun displayWallet(){
+        displayCoins.clear()
+        displayCoins.addAll(coins)
+        adapter = RecyclerAdapter(displayCoins)
+        recyclerView.adapter = adapter
+        location = "wallet"
     }
 }

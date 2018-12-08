@@ -88,4 +88,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/penyWallet" />
 
+    <ImageView
+        android:id="@+id/gift"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/listOfCoins"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.944"
+        app:layout_constraintStart_toStartOf="@+id/penyWallet"
+        app:layout_constraintTop_toBottomOf="@+id/quidWallet"
+        app:layout_constraintVertical_bias="0.36"
+        app:srcCompat="@drawable/gift" />
+
 </android.support.constraint.ConstraintLayout>

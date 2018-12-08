@@ -14,17 +14,17 @@
         android:layout_height="52dp"
         android:layout_marginTop="44dp"
         android:hint="Email"
-        app:layout_constraintTop_toTopOf="@id/NickName"
+        app:layout_constraintTop_toTopOf="@id/sendee"
         tools:layout_editor_absoluteX="7dp"
         tools:ignore="MissingConstraints" />
 
     <EditText
-        android:id="@+id/NickName"
+        android:id="@+id/sendee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:hint="Username"
+        android:hint="Nickname Must be unique"
         app:layout_constraintBottom_toTopOf="@id/passwordSignUp"
         app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintHorizontal_bias="0.582"
@@ -40,7 +40,7 @@
         android:inputType="textPassword"
         tools:layout_editor_absoluteX="7dp"
         app:layout_constraintHorizontal_bias="0.582"
-        app:layout_constraintTop_toBottomOf="@id/NickName"
+        app:layout_constraintTop_toBottomOf="@id/sendee"
         tools:ignore="MissingConstraints" />
 
         <Button

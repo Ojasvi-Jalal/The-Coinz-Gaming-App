@@ -20,4 +20,5 @@
     <string name="title_activity_bank">BankActivity</string>
     <string name="title_activity_shop">ShopActivity</string>
     <string name="title_activity_shopping">ShoppingActivity</string>
+    <string name="title_activity_gift">GiftActivity</string>
 </resources>

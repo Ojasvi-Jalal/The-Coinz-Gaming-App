@@ -32,11 +32,6 @@ class RecyclerAdapter(private val coins: ArrayList<Coin>) : RecyclerView.Adapter
 
     private var displayCoins = ArrayList<Coin>()
 
-    fun RecyclerAdapter(displayCoins: ArrayList<Coin>, lastDownloadDate: String) {
-        this.displayCoins = displayCoins
-        this.lastDownloadDate = lastDownloadDate
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerAdapter.CoinHolder {
         val inflatedView = parent.inflate(R.layout.recyclerview_item_row, false)
         return CoinHolder(inflatedView)
@@ -47,12 +42,11 @@ class RecyclerAdapter(private val coins: ArrayList<Coin>) : RecyclerView.Adapter
     override fun onBindViewHolder(holder: RecyclerAdapter.CoinHolder, position: Int) {
         val coinType = holder.itemView.findViewById<TextView>(R.id.coinType)
         val coinValue = holder.itemView.findViewById<TextView>(R.id.coinVal)
-        val depositButton: Button = holder.itemView.findViewById<Button>(R.id.depositOrGift)
+        val depositButton: Button = holder.itemView.findViewById<Button>(R.id.deposit)
+
         val  coin = coins[position]
         coinType.text = coin.currency
         coinValue.text = "%.5f".format(coin.value.toDouble())
-
-        var adapter: RecyclerAdapter = com.example.ojasvi.coinz.RecyclerAdapter(displayCoins)
 
         depositCoin = FirebaseFirestore.getInstance()
         mAuth = FirebaseAuth.getInstance()
@@ -60,15 +54,31 @@ class RecyclerAdapter(private val coins: ArrayList<Coin>) : RecyclerView.Adapter
         //get the recycler view ready
         val recyclerView = holder.itemView.findViewById<RecyclerView>(R.id.listOfCoins)
 
+        val ref = depositCoin?.collection("wallets")?.document(mAuth?.currentUser?.email!!)
+
+//        ref?.collection("wallet")?.get()?.addOnCompleteListener { task ->
+//            if (task.result != null)
+//                for (document in task.result!!)
+//                    displayCoins.add(document.toObject(Coin::class.java))
+//        }
+
         depositButton.setOnClickListener{
             //if(depositCount<=25&&lastDownloadDate==formattedDate) {
-                    depositCoin?.collection("wallets")?.document(mAuth?.uid!!)?.collection("account")?.add(coin)
+                    ref?.collection("account")?.add(coin)
                     depositCount++
-                    depositCoin?.collection("wallets")?.document(mAuth?.uid!!)?.collection("wallet")?.get()?.addOnCompleteListener { task ->
+                    ref?.collection("wallet")?.get()?.addOnCompleteListener { task ->
                         if (task.result != null)
                             for (document in task.result!!)
                                 if (coin.id == document.toObject(Coin::class.java).id)
                                     document.reference.delete()
+
+//                        displayCoins.remove(coin)
+//                        var adapter: RecyclerAdapter = com.example.ojasvi.coinz.RecyclerAdapter(displayCoins)
+//                        adapter.notifyItemRemoved(position)
+//                        adapter.notifyItemRangeChanged(position,displayCoins.size)
+//                        adapter.notifyDataSetChanged()
+//                        //adapter = com.example.ojasvi.coinz.RecyclerAdapter(displayCoins)
+//                        recyclerView?.adapter = adapter
                     }
 //                }
 //                else
@@ -87,11 +97,6 @@ class RecyclerAdapter(private val coins: ArrayList<Coin>) : RecyclerView.Adapter
 //                }
 
             }
-        displayCoins.remove(coin)
-        adapter.notifyItemRemoved(position)
-        adapter.notifyItemRangeChanged(position,displayCoins.size)
-        adapter = com.example.ojasvi.coinz.RecyclerAdapter(displayCoins)
-        recyclerView?.adapter = adapter
     }
 
 

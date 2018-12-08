@@ -22,7 +22,7 @@ class ShoppingActivity : Activity() {
     private var availableFunds: FirebaseFirestore? = null
     private var mAuth: FirebaseAuth? = null
 
-    private var balance: Double? = 0.toDouble()
+    private var balance: Long? = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,14 +41,16 @@ class ShoppingActivity : Activity() {
         buyCarButton?.isEnabled = false
         buyBungalowButton?.isEnabled = false
 
-        availableFunds?.collection("wallets")
-            ?.document(mAuth?.uid!!)
+        val ref = availableFunds?.collection("wallets")
+                ?.document(mAuth?.currentUser?.email!!)
+
+        ref
                 ?.collection("User info")
                 ?.document("Available funds")
                 ?.get()
                 ?.addOnSuccessListener {
                     if(it.exists() && it != null) {
-                    balance = it.data!!["Account Balance"] as Double?
+                    balance = it.getDouble("Account Balance")?.toLong()
                     buyBungalowButton?.isEnabled = true
                     buyGoldXlButton?.isEnabled = true
                     buyCarButton?.isEnabled = true
@@ -93,13 +95,14 @@ class ShoppingActivity : Activity() {
         super.onStop()
         val netWorth = HashMap<String, Any?>()
         netWorth["Account Balance"]= balance
-        availableFunds?.collection("wallets")
-                ?.document(mAuth?.uid!!)
-                ?.collection("User info")
-                ?.document("Available funds")
-                ?.set(netWorth)
-                ?.addOnSuccessListener { Log.d(TAG, "Account Balance successfully written!") }
-                ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
+        val ref = availableFunds?.collection("wallets")
+                ?.document(mAuth?.currentUser?.email!!)
+
+        ref?.collection("User info")
+            ?.document("Available funds")
+            ?.set(netWorth)
+            ?.addOnSuccessListener { Log.d(TAG, "Account Balance successfully written!") }
+            ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
     }
 
     companion object {

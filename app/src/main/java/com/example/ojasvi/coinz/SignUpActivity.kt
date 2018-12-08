@@ -9,8 +9,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.jetbrains.anko.toast
 
 class SignUpActivity : AppCompatActivity() {
@@ -23,6 +23,7 @@ class SignUpActivity : AppCompatActivity() {
     private var sign_Up_Button: TextView? = null
 
     private var mAuth: FirebaseAuth? = null
+    private var userInfo: FirebaseFirestore? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +32,7 @@ class SignUpActivity : AppCompatActivity() {
         mAuth = FirebaseAuth.getInstance()
         email_Text  = findViewById<EditText>(R.id.emailSignUp)
         password_Text = findViewById<EditText>(R.id.passwordSignUp)
-        username_Text = findViewById(R.id.NickName)
+        username_Text = findViewById(R.id.sendee)
         login_Button = findViewById<Button>(R.id.login) as Button
         sign_Up_Button = findViewById(R.id.register)
 
@@ -98,8 +99,22 @@ class SignUpActivity : AppCompatActivity() {
                             Log.d(TAG, "Registration Failed :( ${task.exception}")
                             toast("Registration Failed :(, Please Try Again!")
                         }
+
+                        val ref = userInfo?.collection("wallets")
+                                ?.document(mAuth?.currentUser?.email!!)
+
+                        val username = HashMap<String, Any?>()
+                        username["Nickname"]= nickname
+
+                        ref?.collection("User info")
+                                ?.document("Nickname")
+                                ?.set(username)
+                                ?.addOnSuccessListener { Log.d(TAG, "Nickname successfully written!") }
+                                ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
                     }
         }
+
+
 
     }
 

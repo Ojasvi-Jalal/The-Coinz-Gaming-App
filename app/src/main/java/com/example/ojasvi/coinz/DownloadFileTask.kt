@@ -1,26 +1,9 @@
 package com.example.ojasvi.coinz
 
-import android.os.AsyncTask
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
-
-//interface DownloadCompleteListener{
-//   fun downloadComplete(result: String)
-//}
-//
-//object DownloadCompleteRunner : DownloadCompleteListener{
-//    var result : String? = null
-//    override fun downloadComplete(result: String) {
-//        this.result = result
-//    }
-//}
-//
-//class DownloadFileTask(private val caller: DownloadCompleteListener):
-//        AsyncTask<String, Void, String>() {
-////    override fun doInBackground(var)
-//}
 
 class DownloadFileTask(private val url: String){
     var result : String? = null

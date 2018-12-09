@@ -1,39 +1,18 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.ojasvi.coinz
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.annotation.TargetApi
-import android.content.pm.PackageManager
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.app.LoaderManager.LoaderCallbacks
-import android.content.CursorLoader
-import android.content.Loader
-import android.database.Cursor
-import android.net.Uri
-import android.os.AsyncTask
-import android.os.Build
-import android.os.Bundle
-import android.provider.ContactsContract
-import android.text.TextUtils
-import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
-import android.widget.TextView
-
-import java.util.ArrayList
-import android.Manifest.permission.READ_CONTACTS
 import android.app.ProgressDialog
 import android.content.Intent
+import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import android.text.TextUtils
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import com.google.firebase.auth.AuthResult
+import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
-
-import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.toast
 
 /**
@@ -41,9 +20,9 @@ import org.jetbrains.anko.toast
  */
 class LoginActivity : AppCompatActivity() {
 
-    private var email_Text: EditText? = null
-    private var password_Text: EditText? = null
-    private var login_Button: Button? = null
+    private var emailText: EditText? = null
+    private var passwordText: EditText? = null
+    private var loginButton: Button? = null
     private var signUpLink: TextView? = null
 
     private var mAuth: FirebaseAuth? = null
@@ -52,13 +31,15 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        email_Text = findViewById<EditText>(R.id.username) as EditText
-        password_Text = findViewById<EditText>(R.id.password) as EditText
-        login_Button = findViewById<Button>(R.id.sign_in_button) as Button
-        signUpLink = findViewById(R.id.sign_up) as TextView
+
+        emailText = findViewById<EditText>(R.id.username)
+        passwordText = findViewById<EditText>(R.id.password) as EditText
+        loginButton = findViewById<Button>(R.id.sign_in_button) as Button
+        signUpLink = findViewById(R.id.sign_up)
 
         //Buttons
-        login_Button!!.setOnClickListener{login()}
+
+        loginButton!!.setOnClickListener { login() }
 
         mAuth = FirebaseAuth.getInstance()
 
@@ -77,17 +58,18 @@ class LoginActivity : AppCompatActivity() {
     fun login(){
         Log.d("Message","Login")
 
-        login_Button!!.isEnabled = false
+        loginButton!!.isEnabled = false
 
-        val progressDialog = ProgressDialog(this@LoginActivity,R.style.AppTheme)
+        @Suppress("DEPRECATION")
+        ProgressDialog(this@LoginActivity, R.style.AppTheme)
 
         // Reset errors.
-        email_Text?.error = null
-        password_Text?.error = null
+        emailText?.error = null
+        passwordText?.error = null
 
         // Store values at the time of the login attempt.
-        val email = email_Text!!.text.toString()
-        val password = password_Text!!.text.toString()
+        val email = emailText!!.text.toString()
+        val password = passwordText!!.text.toString()
 
 
         var cancel = false
@@ -97,19 +79,19 @@ class LoginActivity : AppCompatActivity() {
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            password_Text?.error = getString(R.string.error_invalid_password)
-            focusView = password_Text
+            passwordText?.error = getString(R.string.error_invalid_password)
+            focusView = passwordText
             cancel = true
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            email_Text?.error = getString(R.string.error_field_required)
-            focusView = email_Text
+            emailText?.error = getString(R.string.error_field_required)
+            focusView = emailText
             cancel = true
         } else if (!isEmailValid(email)) {
-            email_Text?.error = getString(R.string.error_invalid_email)
-            focusView = email_Text
+            emailText?.error = getString(R.string.error_invalid_email)
+            focusView = emailText
             cancel = true
         }
 
@@ -119,13 +101,13 @@ class LoginActivity : AppCompatActivity() {
             focusView?.requestFocus()
         } else {
             Log.d("Message", "correct email and password were entered")
-            login_Button!!.isEnabled = true
+            loginButton!!.isEnabled = true
             mAuth?.signInWithEmailAndPassword(email, password)
                     ?.addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
                             Log.d(TAG, "Login Successful!")
                             toast("Login Successful!")
-                            onLoginSuccess()
+                            this.onLoginSuccess()
                         } else {
                             //Sign in failed, display a message to the User
                             Log.d(TAG, "Login Failed :( ${task.exception}")
@@ -146,19 +128,15 @@ class LoginActivity : AppCompatActivity() {
         return email.contains("@")
     }
 
-    fun onLoginSuccess(){
-        login_Button!!.isEnabled = true
+    private fun onLoginSuccess() {
+        loginButton!!.isEnabled = true
         val intent = Intent(this, MainMenuActivity::class.java)
         startActivity(intent)
     }
 
-    fun onLoginFailed(){
-        toast("Login Failed :(")
-    }
-
     companion object {
-        private val TAG = "LoginActivity"
-        private val REQUEST_SIGNUP = 0
+        private const val TAG = "LoginActivity"
+        private const val REQUEST_SIGNUP = 0
     }
 
 }

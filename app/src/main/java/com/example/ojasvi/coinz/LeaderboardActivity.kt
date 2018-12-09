@@ -1,15 +1,12 @@
 package com.example.ojasvi.coinz
 
-import android.os.Bundle
 import android.app.Activity
-import android.util.Log
+import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
 import kotlinx.android.synthetic.main.activity_leaderboard.*
-import org.w3c.dom.Text
 
 class LeaderboardActivity : Activity() {
 

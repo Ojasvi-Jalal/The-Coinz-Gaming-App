@@ -1,17 +1,15 @@
 package com.example.ojasvi.coinz
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
-import kotlinx.android.synthetic.main.activity_bank.*
 import java.math.BigDecimal
 
 class BankActivity : Activity() {
@@ -76,26 +74,26 @@ class BankActivity : Activity() {
                                 .addOnCompleteListener { task ->
                                     if (task.result != null)
                                         for (document in task.result!!) {
-                                            var coin = document.toObject(Coin::class.java)
+                                            val coin = document.toObject(Coin::class.java)
                                             //Log.d(TAG, coin.value.toString())
                                             if (shilRate != null) {
                                                 if (coin.currency == "SHIL")
-                                                    totalBalance += shilRate * coin.value?.toBigDecimal()
+                                                    totalBalance += shilRate * coin.value.toBigDecimal()
                                                 Log.d(TAG, totalBalance.toString())
                                             }
                                             if (penyRate != null) {
                                                 if (document.toObject(Coin::class.java).currency == "PENY")
-                                                    totalBalance += penyRate * coin.value?.toBigDecimal()
+                                                    totalBalance += penyRate * coin.value.toBigDecimal()
                                                 Log.d(TAG, totalBalance.toString())
                                             }
                                             if (dolrRate != null) {
                                                 if (document.toObject(Coin::class.java).currency == "DOLR")
-                                                    totalBalance += dolrRate * coin.value?.toBigDecimal()
+                                                    totalBalance += dolrRate * coin.value.toBigDecimal()
                                                 Log.d(TAG, totalBalance.toString())
                                             }
                                             if (quidRate != null) {
                                                 if (document.toObject(Coin::class.java).currency == "QUID")
-                                                    totalBalance += quidRate * coin.value?.toBigDecimal()
+                                                    totalBalance += quidRate * coin.value.toBigDecimal()
                                                 Log.d(TAG, totalBalance.toString())
                                             }
                                         }
@@ -108,13 +106,13 @@ class BankActivity : Activity() {
         walletButton = findViewById(R.id.wallet)
         shopButton = findViewById(R.id.goShopping)
         walletButton!!.isEnabled = true
-        walletButton!!.setOnClickListener(){
+        walletButton!!.setOnClickListener {
             Log.d(TAG,"Openining wallet")
             intent = Intent(this,WalletActivity::class.java)
             startActivity(intent)
         }
 
-        shopButton!!.setOnClickListener(){
+        shopButton!!.setOnClickListener {
             Log.d(TAG,"Going to the shop")
             intent = Intent(this,ShoppingActivity::class.java)
             startActivity(intent)
@@ -122,12 +120,12 @@ class BankActivity : Activity() {
 
     }
 
-    fun setBalance(){
+    private fun setBalance(){
         balance = findViewById(R.id.userBalance)
         balance?.text = "%.3f".format(totalBalance)
         val netWorth = HashMap<String, Any?>()
         netWorth["Account Balance"] = totalBalance.toLong()
-        var db = bankAccount?.collection("wallets")
+        val db = bankAccount?.collection("wallets")
                 ?.document(mAuth?.currentUser?.email!!)
                 ?.collection("User info")
         db
@@ -137,7 +135,7 @@ class BankActivity : Activity() {
                 ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
 
 
-        var nickname:String = ""
+        var nickname: String
         bankAccount?.runTransaction { transaction ->
             if(db != null) {
                 val doc = transaction.get(db.document("Nickname"))

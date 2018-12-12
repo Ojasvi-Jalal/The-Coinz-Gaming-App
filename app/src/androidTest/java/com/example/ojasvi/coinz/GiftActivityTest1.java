@@ -62,45 +62,35 @@ public class GiftActivityTest1 {
             e.printStackTrace();
         }
 
-        ViewInteraction appCompatEditText2 = onView(
-                allOf(withId(R.id.username), withText("o."),
+        //LogIn
+        ViewInteraction appCompatEdit= onView(
+                allOf(withId(R.id.username),
                         isDisplayed()));
-        appCompatEditText2.perform(replaceText("o.j@g.com"));
+        appCompatEdit.perform(click());
+
+        // Added a sleep statement to match the app's execution delay.
+        // The recommended way to handle such scenarios is to use Espresso idling resources:
+        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction appCompatEditText2 = onView(
+                allOf(withId(R.id.username),
+                        isDisplayed()));
+        appCompatEditText2.perform(replaceText("o.j@g.com"), closeSoftKeyboard());
 
         ViewInteraction appCompatEditText3 = onView(
-                allOf(withId(R.id.username), withText("o.j@g.com"),
-                        isDisplayed()));
-        appCompatEditText3.perform(closeSoftKeyboard());
-
-        ViewInteraction appCompatEditText4 = onView(
                 allOf(withId(R.id.password),
                         isDisplayed()));
-        appCompatEditText4.perform(replaceText("ojgc12"), closeSoftKeyboard());
+        appCompatEditText3.perform(replaceText("ojgc123"), closeSoftKeyboard());
 
         ViewInteraction appCompatButton = onView(
                 allOf(withId(R.id.sign_in_button), withText("Log in"),
                         isDisplayed()));
         appCompatButton.perform(click());
-
-        ViewInteraction appCompatEditText5 = onView(
-                allOf(withId(R.id.password), withText("ojgc12"),
-                        isDisplayed()));
-        appCompatEditText5.perform(click());
-
-        ViewInteraction appCompatEditText6 = onView(
-                allOf(withId(R.id.password), withText("ojgc12"),
-                        isDisplayed()));
-        appCompatEditText6.perform(replaceText("ojgc123"));
-
-        ViewInteraction appCompatEditText7 = onView(
-                allOf(withId(R.id.password), withText("ojgc123"),
-                        isDisplayed()));
-        appCompatEditText7.perform(closeSoftKeyboard());
-
-        ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.sign_in_button), withText("Log in"),
-                        isDisplayed()));
-        appCompatButton2.perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:

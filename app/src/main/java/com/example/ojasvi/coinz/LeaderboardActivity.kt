@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.activity_leaderboard.*
 
 class LeaderboardActivity : Activity() {
 
+    //FirebaseAuth and Firestore objects to access the database
     private var mAuth: FirebaseAuth? = null
     private var userScore: FirebaseFirestore? = null
 
@@ -17,12 +18,15 @@ class LeaderboardActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_leaderboard)
 
+        //get the firestore and firebase instances
         userScore = FirebaseFirestore.getInstance()
         mAuth = FirebaseAuth.getInstance()
+
 
         val refUser = userScore?.collection("wallets")
                 ?.document(mAuth?.currentUser?.email!!)
 
+        //gets the current user's score
         refUser?.collection("User info")
                 ?.document("Available funds")
                 ?.get()
@@ -35,30 +39,33 @@ class LeaderboardActivity : Activity() {
 
         val ref = userScore?.collection("wallets")?.document("scores")
 
+        //get the highest scores from the doc "scores" in the database and display them
         ref?.get()
-                ?.addOnCompleteListener {
-                    if(it.result!=null){
-                            val result = it.result
-                        @Suppress("UNCHECKED_CAST")
-                        val data = result!!.data as HashMap<String,Long>
-                        val scores = data.toList().sortedByDescending { (_,value) -> value }.toMap()
-                        val leaderboard = listOf<Pair<TextView,TextView>>(Pair(user1,score1)
-                                ,Pair(user2,score2),Pair(user3,score3),Pair(user4,score4))
-                        var i = 0
-                        loop@ for (score in scores){
-                            leaderboard[i].first.visibility = View.VISIBLE
-                            leaderboard[i].second.visibility = View.VISIBLE
-                            leaderboard[i].first.text = score.key
-                            leaderboard[i].second.text = score.value.toString()
-                            i += 1
-                            if (i==4){
-                                break@loop
-                            }
-
+        ?.addOnCompleteListener {
+                if(it.result!=null){
+                    val result = it.result
+                    @Suppress("UNCHECKED_CAST")
+                    val data = result!!.data as HashMap<String,Long>
+                    //sorts the scores in descending order
+                    val scores = data.toList().sortedByDescending { (_,value) -> value }.toMap()
+                    //takes the first best four users and their scores
+                    val leaderboard = listOf<Pair<TextView,TextView>>(Pair(user1,score1)
+                            ,Pair(user2,score2),Pair(user3,score3),Pair(user4,score4))
+                    var i = 0
+                    //displays the scores
+                    loop@ for (score in scores){
+                        leaderboard[i].first.visibility = View.VISIBLE
+                        leaderboard[i].second.visibility = View.VISIBLE
+                        leaderboard[i].first.text = score.key
+                        leaderboard[i].second.text = score.value.toString()
+                        i += 1
+                        if (i==4){
+                            break@loop
                         }
+                    }
 
-                    }
-                    }
+                }
+            }
 
         }
 

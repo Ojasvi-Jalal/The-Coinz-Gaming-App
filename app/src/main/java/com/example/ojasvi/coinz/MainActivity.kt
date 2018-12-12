@@ -41,24 +41,35 @@ import java.time.format.DateTimeFormatter
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener {
 
     private val tag = "MainActivity"
+
+    //later used to set up the map
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
 
     private var downloadDate = "" // Format: YYYY/MM/DD
     private val preferencesFile = "MyPrefsFile" // for storing preferences
 
+    //will keep track of user's location
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
     private lateinit var locationEngine: LocationEngine
     private lateinit var locationLayerPlugin : LocationLayerPlugin
+
+    //get the current date and format it to YYYY/MM/DD
     private val date = LocalDate.now()
     private val formatDate = DateTimeFormatter.ofPattern("uuuu/MM/dd")
     private val formattedDate = date.format(formatDate)
+
+    //will store the downloaded JSON files
     private var coins = ""
+
+    //For storing the daily rates of the different coins
     private var shilRate = ""
     private  var quidRate = ""
     private var dolrRate = ""
     private var penyRate = ""
+
+    //opens up the bank if clicked
     private var bankButton: ImageView? = null
 
     //Saving collected coins
@@ -66,16 +77,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var storeWallet: FirebaseFirestore? = null
 
     //initialise dataset
-   // private var wallet: MutableList<Coin> = MutableList()
     private val wallet = mutableListOf<Coin>()
     private var mAuth: FirebaseAuth? = null
     private val coinPresent = mutableListOf<Coin>()
 
-    companion object {
-        private const val COLLECTION_KEY = "wallets"
-    }
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+        //sets activity_main as the layout
         setContentView(R.layout.activity_main)
 
         // Use com.google.firebase.Timestamp objects instead of java.util.Date objects
@@ -85,11 +93,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         storeWallet?.firestoreSettings = settings
 
         Mapbox.getInstance(this, getString(R.string.ACCESS_TOKEN))
+
+        //set the firestore and the firebase auth
         storeWallet = FirebaseFirestore.getInstance()
         mAuth = FirebaseAuth.getInstance()
 
+        //bankButton set to the relevant view in the relevant layout
         bankButton = findViewById(R.id.piggyBank)
 
+        //download the map
         mapView = findViewById(R.id.mapboxMapView)
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
@@ -99,67 +111,77 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //Once Map's ready
     override fun onMapReady(mapboxMap: MapboxMap?){
-        if(mapboxMap == null){
+        if(mapboxMap == null)
+        {
             d(tag,"[onMapReady] mapboxMap is null")
         }
-        else{
+        else
+        {
             map = mapboxMap
             //Set user interface options
             map?.uiSettings?.isCompassEnabled = true
-            map?.uiSettings?.isZoomControlsEnabled = true
+            map?.uiSettings?.isZoomControlsEnabled = false
 
             //Make location information available
             enableLocation()
             //add the coins
-            val featureCollection : FeatureCollection = FeatureCollection.fromJson(coins)
+            val featureCollection: FeatureCollection = FeatureCollection.fromJson(coins)
 
+            //intialise prefSettings to the preferences file
             val prefSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
 
+            //reset the different currency rates using the values from the preferences file
+            // if not preset set to ""
             shilRate = prefSettings.getString("shil rate", "")
             quidRate = prefSettings.getString("quid rate", "")
             dolrRate = prefSettings.getString("dolr rate", "")
             penyRate = prefSettings.getString("peny rate", "")
 
-            val rates  = JSONObject(coins).getJSONObject("rates")
+            //get the rates block from downloaded file and set the rates
+            val rates = JSONObject(coins).getJSONObject("rates")
             quidRate = rates.get("QUID").toString()
-            d(tag,quidRate)
+            d(tag, quidRate)
             shilRate = rates.get("SHIL").toString()
-            d(tag,shilRate)
+            d(tag, shilRate)
             dolrRate = rates.get("DOLR").toString()
-            d(tag,dolrRate)
+            d(tag, dolrRate)
             penyRate = rates.get("PENY").toString()
-            d(tag,penyRate)
+            d(tag, penyRate)
 
-            //val source = GeoJsonSource("my.data.source",featureCollection)
-            val features : List<Feature>? = featureCollection.features()
+            val features: List<Feature>? = featureCollection.features()
             val ref = storeWallet?.collection(COLLECTION_KEY)?.document(mAuth?.currentUser?.email!!)
-            ref
-                    ?.collection("wallet")
-                    ?.get()
-                    ?.addOnCompleteListener { task ->
+            ref?.collection("wallet")
+            ?.get()
+            ?.addOnCompleteListener { task ->
                 if (task.result != null) {
                     for (document in task.result!!)
                         coinPresent.add(document.toObject(Coin::class.java))
-                    if (features != null) {
-                        for (feature: Feature in features) {
+                    if (features != null)
+                    {
+                        //gets the coins to put on the map
+                        for (feature: Feature in features)
+                        {
                             val geo = feature.geometry() as com.mapbox.geojson.Point
 
                             val currency = feature.getStringProperty("currency")
 
                             var coinIcon = R.drawable.test
-                            if (currency == "DOLR") {
-                                coinIcon = R.drawable.dolr
+                            when (currency) {
+                                "DOLR" -> coinIcon = R.drawable.dolr
+                                "QUID" -> coinIcon = R.drawable.quid
+                                "PENY" -> coinIcon = R.drawable.peny
+                                "SHIL" -> coinIcon = R.drawable.shil
                             }
-                            else if (currency == "QUID")
-                                coinIcon = R.drawable.quid
-                            else if (currency == "PENY")
-                                coinIcon = R.drawable.peny
-                            else if (currency == "SHIL")
-                                coinIcon = R.drawable.shil
 
                             val icons = IconFactory.getInstance(this)
 
+                            /*
+                            if downloadDate == formattedDate and the coin in
+                            the json file has already been collected earlier that day,
+                            the coin won't be added to the map.
+                             */
                             if (downloadDate == formattedDate) {
                                 if (coinPresent.map { it -> it.id }.contains(feature.getStringProperty("id")))
                                     d(tag, "Won't add this marker")
@@ -176,8 +198,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                                         .icon(icons.fromResource(coinIcon)))
                                 downloadDate = formattedDate
                             }
-                            bankButton?.setOnClickListener{
-                                d(MainMenuActivity.TAG,"Opening the bank")
+
+                            //Opens up the bank activity when user clicks on the piggy bank
+                            bankButton?.setOnClickListener {
+                                d(MainMenuActivity.TAG, "Opening the bank")
                                 val intent = Intent(this, BankActivity::class.java)
                                 startActivity(intent)
                             }
@@ -193,35 +217,47 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     latitude = marker.position.latitude
                     longitude = marker.position.longitude
                 }
-                if(originLocation.distanceTo(markerLocation)<2005) {
-                    val markerLoc =  marker.position
-                    if(features != null) {
-                        for (feature: Feature in features){
-                            val currency =  feature.getStringProperty("currency")
-                            val value = feature.getStringProperty("value")
-                            val id = feature.getStringProperty("id")
-                            var coin: Coin = Coin(currency,value,id)
-                            d(tag,coin.toString())
-                            val geo = feature.geometry() as com.mapbox.geojson.Point
-                            if(markerLoc.latitude == geo.latitude() && markerLoc.longitude == geo.longitude()){
-                                wallet.add(coin)
-                                ref?.collection("wallet")?.add(coin)
+                if (::originLocation.isInitialized) {
+                    /*
+                    if user with 25 m of coin
+                    the coin may be collected by clicking on it
+                    */
+                    if (originLocation.distanceTo(markerLocation) < 25) {
+                        val markerLoc = marker.position
+                        if (features != null) {
+                            for (feature: Feature in features) {
+                                val currency = feature.getStringProperty("currency")
+                                val value = feature.getStringProperty("value")
+                                val id = feature.getStringProperty("id")
+                                val coin = Coin(
+                                        currency,
+                                        value,
+                                        id
+                                )
+                                d(tag, coin.toString())
+                                val geo = feature.geometry() as com.mapbox.geojson.Point
+
+                                //adds the collected coin to user's wallet
+                                if (markerLoc.latitude == geo.latitude() && markerLoc.longitude == geo.longitude()) {
+                                    wallet.add(coin)
+                                    ref?.collection("wallet")?.add(coin)
+                                }
                             }
                         }
+                        //removes the coin once collected
+                        map?.removeMarker(marker)
+                        toast("You collected a coin!")
+                        d(tag, wallet.toString())
                     }
-                    map?.removeMarker(marker)
-                    toast("You collected a coin!")
-                    d(tag,wallet.toString())
-                }
-                else
-                {
-                    toast("Coin not within 25 meters, sorry! :(")
+                    //when user not within 25 meters
+                    else toast("Coin not within 25 meters, sorry! :(")
                 }
                 true
             }
         }
     }
 
+    //enable location permissions
     private fun enableLocation(){
         if(PermissionsManager.areLocationPermissionsGranted(this)){
            d(tag, "Permissions are granted")
@@ -236,6 +272,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     @SuppressWarnings("MissingPermission")
+    //initialise location engine
     private fun initialiseLocationEngine(){
         locationEngine = LocationEngineProvider(this)
                 .obtainBestLocationEngineAvailable()
@@ -254,11 +291,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //to track the user's location
     private fun setCameraPosition(location: Location){
         val latlng = LatLng(location.latitude,location.longitude)
         map?.animateCamera(CameraUpdateFactory.newLatLng(latlng))
     }
 
+    //when user's location changes
     override fun onLocationChanged(location: Location?) {
         if(location == null){
             d(tag,"[onLocationChanged] location is null")
@@ -363,5 +402,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView?.onSaveInstanceState(outState)
+    }
+
+    companion object
+    {
+        //name of the collection on firestore
+        private const val COLLECTION_KEY = "wallets"
     }
 }

@@ -18,6 +18,10 @@
         tools:layout_editor_absoluteX="7dp"
         tools:ignore="MissingConstraints" />
 
+    <com.jetradarmobile.snowfall.SnowfallView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <EditText
         android:id="@+id/sendee"
         android:layout_width="match_parent"

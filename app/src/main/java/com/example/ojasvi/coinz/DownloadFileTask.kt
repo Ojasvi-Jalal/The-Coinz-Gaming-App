@@ -5,6 +5,8 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
+//Download the file
+
 class DownloadFileTask(private val url: String){
     var result : String? = null
 

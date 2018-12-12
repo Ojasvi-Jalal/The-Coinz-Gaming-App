@@ -20,29 +20,38 @@ import org.jetbrains.anko.toast
  */
 class LoginActivity : AppCompatActivity() {
 
+    //user's email
     private var emailText: EditText? = null
+    //user's password
     private var passwordText: EditText? = null
+    //login button to lead to the main menu
     private var loginButton: Button? = null
+    //link to make a user account
     private var signUpLink: TextView? = null
 
+    //initialise firebase auth
     private var mAuth: FirebaseAuth? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
+
+        //sets the layout to be activity_login
         setContentView(R.layout.activity_login)
 
-
-        emailText = findViewById<EditText>(R.id.username)
-        passwordText = findViewById<EditText>(R.id.password) as EditText
-        loginButton = findViewById<Button>(R.id.sign_in_button) as Button
+        //set the fields and the buttons according to the activity login
+        emailText = findViewById(R.id.username)
+        passwordText = findViewById(R.id.password)
+        loginButton = findViewById(R.id.sign_in_button)
         signUpLink = findViewById(R.id.sign_up)
 
-        //Buttons
-
+        //if user clicks on login
         loginButton!!.setOnClickListener { login() }
 
+        //set the firebase auth
         mAuth = FirebaseAuth.getInstance()
 
+        //if a user is already logged in then directly opens the main menu
         if(mAuth?.currentUser != null)
             onLoginSuccess()
 
@@ -55,9 +64,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun login(){
+    private fun login(){
         Log.d("Message","Login")
 
+        //login button disabled until further notice
         loginButton!!.isEnabled = false
 
         @Suppress("DEPRECATION")
@@ -78,18 +88,24 @@ class LoginActivity : AppCompatActivity() {
         Log.d(TAG, "In login activity, got email and password")
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password))
+        {
             passwordText?.error = getString(R.string.error_invalid_password)
             focusView = passwordText
             cancel = true
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        //  If the email field is empty
+        if (TextUtils.isEmpty(email))
+        {
             emailText?.error = getString(R.string.error_field_required)
             focusView = emailText
             cancel = true
-        } else if (!isEmailValid(email)) {
+        }
+        // If the email doesn't meet the criterion
+        else if (!isEmailValid(email))
+        {
             emailText?.error = getString(R.string.error_invalid_email)
             focusView = emailText
             cancel = true
@@ -100,6 +116,7 @@ class LoginActivity : AppCompatActivity() {
             // form field with an error.
             focusView?.requestFocus()
         } else {
+            // The user entered valid credentials
             Log.d("Message", "correct email and password were entered")
             loginButton!!.isEnabled = true
             mAuth?.signInWithEmailAndPassword(email, password)
@@ -119,17 +136,21 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun isPasswordValid(password: String): Boolean {
-        //TODO: Replace this with your own logic
-        return password.length > 4
+        //not very strict: to make it more user friendly;
+        //Suggestion: Perhaps could become more restrictive in the future
+        return password.length > 6
     }
 
     private fun isEmailValid(email: String): Boolean {
-        //TODO: Replace this with your own logic
+        //not very strict: to make it more user friendly;
+        //Suggestion: Perhaps could become more restrictive in the future
         return email.contains("@")
     }
 
     private fun onLoginSuccess() {
+        //valid credentials entered: enable the login button
         loginButton!!.isEnabled = true
+        //switch to the main menu activityz
         val intent = Intent(this, MainMenuActivity::class.java)
         startActivity(intent)
     }

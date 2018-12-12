@@ -15,31 +15,44 @@ import org.jetbrains.anko.toast
 
 class SignUpActivity : AppCompatActivity() {
 
+    //user's email
+    private var emailText: EditText? = null
+    //user's password
+    private var passwordText: EditText? = null
+    //username(nickname)
+    private var usernameText: EditText? = null
+    //login button to lead to the main menu
+    private var loginButton: Button? = null
+    //does registration
+    private var signUpButton: TextView? = null
 
-    private var email_Text: EditText? = null
-    private var password_Text: EditText? = null
-    private var username_Text: EditText? = null
-    private var login_Button: Button? = null
-    private var sign_Up_Button: TextView? = null
-
+    //initialise firebase auth
     private var mAuth: FirebaseAuth? = null
+    //initialise firestore
     private var userInfo: FirebaseFirestore? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //sets the layout to be activity_sign_up
         setContentView(R.layout.activity_sign_up)
 
+        //set the firebase auth
         mAuth = FirebaseAuth.getInstance()
+        //set the firestore
         userInfo = FirebaseFirestore.getInstance()
-        email_Text  = findViewById<EditText>(R.id.emailSignUp)
-        password_Text = findViewById<EditText>(R.id.passwordSignUp)
-        username_Text = findViewById(R.id.sendee)
-        login_Button = findViewById<Button>(R.id.login) as Button
-        sign_Up_Button = findViewById(R.id.register)
 
-        sign_Up_Button!!.setOnClickListener(){signup()}
+        //set the fields to the relevant views in the layout
+        emailText  = findViewById(R.id.emailSignUp)
+        passwordText = findViewById(R.id.passwordSignUp)
+        usernameText = findViewById(R.id.sendee)
+        loginButton = findViewById(R.id.login)
+        signUpButton = findViewById(R.id.register)
 
-        login_Button!!.setOnClickListener(){
+        //user clicks on signUp
+        signUpButton!!.setOnClickListener{signup()}
+
+        loginButton!!.setOnClickListener{
             //Finish the registration screen and return to the Login activity
             val intent = Intent(applicationContext, LoginActivity::class.java)
             startActivity(intent)
@@ -48,38 +61,38 @@ class SignUpActivity : AppCompatActivity() {
 
     }
 
-    fun signup(){
+    private fun signup(){
         Log.d(TAG, "User Registration")
 
-        login_Button!!.isEnabled = true
+        loginButton!!.isEnabled = true
 
         // Reset errors.
-        email_Text?.error = null
-        password_Text?.error = null
+        emailText?.error = null
+        passwordText?.error = null
 
         // Store values at the time of the login attempt.
-        val email = email_Text!!.text.toString()
-        val password = password_Text!!.text.toString()
-        val nickname = username_Text!!.text.toString()
+        val email = emailText!!.text.toString()
+        val password = passwordText!!.text.toString()
+        val nickname = usernameText!!.text.toString()
 
         var cancel = false
         var focusView: View? = null
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            password_Text?.error = getString(R.string.error_invalid_password)
-            focusView = password_Text
+            passwordText?.error = getString(R.string.error_invalid_password)
+            focusView = passwordText
             cancel = true
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            email_Text?.error = getString(R.string.error_field_required)
-            focusView = email_Text
+            emailText?.error = getString(R.string.error_field_required)
+            focusView = emailText
             cancel = true
         } else if (!isEmailValid(email)) {
-            email_Text?.error = getString(R.string.error_invalid_email)
-            focusView = email_Text
+            emailText?.error = getString(R.string.error_invalid_email)
+            focusView = emailText
             cancel = true
         }
 
@@ -87,32 +100,37 @@ class SignUpActivity : AppCompatActivity() {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView?.requestFocus()
-        } else {
+        }
+        else
+        {
             Log.d("Message", "correct email and password were entered")
 
             mAuth?.createUserWithEmailAndPassword(email, password)
-                    ?.addOnCompleteListener(this) { task ->
-                        if (task.isSuccessful) {
-                            Log.d(TAG, "Registration Successful!")
-                            toast("Registration Successful!")
-                        } else {
-                            //Sign in failed, display a message to the User
-                            Log.d(TAG, "Registration Failed :( ${task.exception}")
-                            toast("Registration Failed :(, Please Try Again!")
-                        }
+            ?.addOnCompleteListener(this) { task ->
+                if (task.isSuccessful)
+                {
+                    //create User With Email And Password on Firebase
+                    Log.d(TAG, "Registration Successful!")
+                    toast("Registration Successful!")
+                    val ref = userInfo?.collection("wallets")
+                            ?.document(mAuth?.currentUser?.email!!)
 
-                        val ref = userInfo?.collection("wallets")
-                                ?.document(mAuth?.currentUser?.email!!)
+                    val username = HashMap<String, Any?>()
+                    username["Nickname"]= nickname
 
-                        val username = HashMap<String, Any?>()
-                        username["Nickname"]= nickname
-
-                        ref?.collection("User info")
-                                ?.document("Nickname")
-                                ?.set(username)
-                                ?.addOnSuccessListener { Log.d(TAG, "Nickname successfully written!") }
-                                ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
-                    }
+                    ref?.collection("User info")
+                            ?.document("Nickname")
+                            ?.set(username)
+                            ?.addOnSuccessListener { Log.d(TAG, "Nickname successfully written!") }
+                            ?.addOnFailureListener { e -> Log.w(TAG, "Error writing document", e)}
+                }
+                else
+                {
+                    //Sign in failed, display a message to the User
+                    Log.d(TAG, "Registration Failed :( ${task.exception}")
+                    toast("Registration Failed :(, Please Try Again!")
+                }
+            }
         }
 
 
@@ -120,17 +138,18 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun isPasswordValid(password: String): Boolean {
-        //TODO: Replace this with your own logic
-        return password.length > 4
+        //not very strict: to make it more user friendly;
+        //Suggestion: Perhaps could become more restrictive in the future
+        return password.length > 6
     }
 
     private fun isEmailValid(email: String): Boolean {
-        //TODO: Replace this with your own logic
+        //not very strict: to make it more user friendly;
+        //Suggestion: Perhaps could become more restrictive in the future
         return email.contains("@")
     }
 
     companion object {
-        private val TAG = "SignUpActivity"
-        private val REQUEST_SIGNUP = 0
+        private const val TAG = "SignUpActivity"
     }
 }
